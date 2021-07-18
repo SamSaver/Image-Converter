@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>samarths@iitbhilai.ac.in | 11941060</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
+</head>
+<body>
+
+    <div class="container">
+        <!-- code here -->
+        <div class="card">
+            <div class="card-image">	
+                <h2 class="card-heading">
+                    Image Conversion
+                    <small>Internship Assignment</small>
+                </h2>
+            </div>
+            <form class="card-form">
+                <div class="input">
+                    <input type="number" name="height" id="height" class="input-field" required/>
+                    <label class="input-label">Height</label>
+                </div>
+                <div class="input">
+                    <input type="number" name="width" id="width" class="input-field" required/>
+                    <label class="input-label">Width</label>
+                </div>
+                <div class="input">
+                    <input type="text" name="picUrl" id="picUrl" class="input-field" required/>
+                    <label class="input-label">Picture URL</label>
+                </div>
+                <div class="action">
+                    <button class="action-button">Submit</button>
+                </div>
+            </form>
+            <div class="card-info">
+                <p>Thank You. Made By <a href="https://www.linkedin.com/in/samarth-singh-pawar/">Samarth Singh Pawar</a></p>
+            </div>
+        </div>
+    </div>
+    
+      <div class="my-card" id="output_div">
+      </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <script>
+
+        $('form').submit(function submitData(event){
+            event.preventDefault();
+
+            obj = {}
+            obj.width = $('#width').val();
+            obj.height = $('#height').val();
+            obj.picUrl = $('#picUrl').val();
+
+            // Used as a callback function after post request success
+            const success = (res) => {
+                $('#output_div').empty();
+                $('#output_div').append('<a class="action-button" href="output.webp" download="outputImage">Download WebP File</a>')
+                window.scrollBy(0, obj.height * 10)
+            }
+
+            // Generating a post request
+            $.ajax({
+                type: "POST",
+                url: '/submitRoute',
+                data: obj,
+                success: success,
+                dataType: 'html'
+            });
+        });
+    </script>
+    
+</body>
+</html>
