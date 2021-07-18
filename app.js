@@ -2,6 +2,7 @@
 const express = require('express');
 const sharp = require('sharp');
 const db = require('./firebase')
+const firebase = require('firebase')
 const request = require('request');
 const fs = require('fs');
 const app = express();
@@ -37,6 +38,7 @@ app.post('/submitRoute', (req, res)=>{
 
             db.collection('events').add({
                 event: myEvent,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
             })
 
             request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
@@ -50,6 +52,7 @@ app.post('/submitRoute', (req, res)=>{
         myEvent = 'Image is Downloaded'
         db.collection('events').add({
             event: myEvent,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
         })
 
         sharp('myPic.png')
@@ -66,12 +69,14 @@ app.post('/submitRoute', (req, res)=>{
                 channels: ${data.channels}\n
                 premultiplied: ${data.premultiplied}\n
                 size: ${data.size}\n
-                `
+                `,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
             })
             res.send();
         })
         .catch(err => db.collection('errors').add({
             error: err,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
         }))
     });
 })
@@ -82,5 +87,6 @@ app.listen(port, ()=>{
     console.log(`Listening on port: ${port}`);
     db.collection('events').add({
         event: `Listening on port: ${port}`,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
     })
 });
