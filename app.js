@@ -1,6 +1,7 @@
 // Setting up the server and importing dependencies
 const express = require('express');
 const sharp = require('sharp');
+const db = require('./firebase')
 const request = require('request');
 const fs = require('fs');
 const app = express();
@@ -30,8 +31,13 @@ app.post('/submitRoute', (req, res)=>{
     // Function to download a pic from URL
     var download = function(uri, filename, callback){
         request.head(uri, function(err, res, body){
-            console.log('content-type:', res.headers['content-type']);
-            console.log('content-length:', res.headers['content-length']);
+            myEvent = `Downloading Image from uri ${uri}`
+            myEvent += (`content-type: ${res.headers['content-type']}\n`);
+            myEvent += (`content-length: ${res.headers['content-length']}`);
+
+            db.collection('events').add({
+                event: myEvent,
+            })
 
             request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
         });
@@ -41,16 +47,40 @@ app.post('/submitRoute', (req, res)=>{
     download(picUrl, 'myPic.png', function(){
         // This is a callback function that will be triggered after the file has been downloaded
 
-        console.log('Pic is downloaded');
+        myEvent = 'Image is Downloaded'
+        db.collection('events').add({
+            event: myEvent,
+        })
 
         sharp('myPic.png')
         .resize(width, height)
         .toFile(__dirname+'/public/output.webp')
-        .then((data)=>{console.log(data);res.send()})
-        .catch(err => console.log(err))
+        .then((data)=>{
+            console.log(data);
+            db.collection('events').add({
+                event: 
+                `Image conversion Data:\n
+                format: ${data.format}\n
+                width: ${data.width}\n
+                height: ${data.height}\n
+                channels: ${data.channels}\n
+                premultiplied: ${data.premultiplied}\n
+                size: ${data.size}\n
+                `
+            })
+            res.send();
+        })
+        .catch(err => db.collection('errors').add({
+            error: err,
+        }))
     });
 })
 
 
 //Listening on port
-app.listen(port, ()=>{console.log(`Listening on port: ${port}`);});
+app.listen(port, ()=>{
+    console.log(`Listening on port: ${port}`);
+    db.collection('events').add({
+        event: `Listening on port: ${port}`,
+    })
+});
